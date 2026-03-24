@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Mini Arcade</title>
+<style>
+body {
+    background: #111;
+    color: white;
+    text-align: center;
+    font-family: Arial;
+}
+canvas {
+    background: #222;
+    border: 2px solid #555;
+    display: none;
+    margin: auto;
+}
+button {
+    padding: 10px;
+    margin: 5px;
+    font-size: 16px;
+}
+</style>
+</head>
+<body>
+
+<h1>Mini Arcade</h1>
+
+<button onclick="showGame('game1')">Bounce Game</button>
+<button onclick="showGame('game2')">Dodge Game</button>
+
+<br><br>
+
+<canvas id="game1" width="400" height="600"></canvas>
+<canvas id="game2" width="400" height="600"></canvas>
+
+<script>
+let currentGame = null;
+
+/* SWITCH GAMES */
+function showGame(gameId){
+    document.getElementById("game1").style.display="none";
+    document.getElementById("game2").style.display="none";
+    document.getElementById(gameId).style.display="block";
+    currentGame = gameId;
+}
+
+/* GAME 1 */
+let c1 = document.getElementById("game1");
+let ctx1 = c1.getContext("2d");
+
+let player = {x:200,y:500,dy:0,gravity:0.5,bounce:-18};
+let coins = [];
+
+function spawnCoin(){
+    coins.push({x:Math.random()*380,y:Math.random()*400});
+}
+for(let i=0;i<5;i++) spawnCoin();
+
+function game1(){
+    ctx1.clearRect(0,0,400,600);
+
+    player.dy += player.gravity;
+    player.y += player.dy;
+
+    if(player.y > 580){
+        player.y = 580;
+        player.dy = player.bounce;
+    }
+
+    ctx1.beginPath();
+    ctx1.arc(player.x,player.y,15,0,Math.PI*2);
+    ctx1.fillStyle="cyan";
+    ctx1.fill();
+
+    coins.forEach(c=>{
+        ctx1.beginPath();
+        ctx1.arc(c.x,c.y,10,0,Math.PI*2);
+        ctx1.fillStyle="gold";
+        ctx1.fill();
+    });
+}
+
+c1.addEventListener("mousemove", e=>{
+    let rect = c1.getBoundingClientRect();
+    player.x = e.clientX - rect.left;
+});
+
+/* GAME 2 */
+let c2 = document.getElementById("game2");
+let ctx2 = c2.getContext("2d");
+
+let player2 = {x:180,y:550,w:40,h:20};
+let blocks = [];
+
+function spawnBlock(){
+    blocks.push({x:Math.random()*360,y:-20});
+}
+
+function game2(){
+    ctx2.clearRect(0,0,400,600);
+
+    if(Math.random()<0.02) spawnBlock();
+
+    ctx2.fillStyle="lime";
+    ctx2.fillRect(player2.x,player2.y,player2.w,player2.h);
+
+    ctx2.fillStyle="red";
+    blocks.forEach(b=>{
+        b.y += 3;
+        ctx2.fillRect(b.x,b.y,40,20);
+    });
+}
+
+c2.addEventListener("mousemove", e=>{
+    let rect = c2.getBoundingClientRect();
+    player2.x = e.clientX - rect.left;
+});
+
+/* MAIN LOOP */
+function loop(){
+    if(currentGame === "game1") game1();
+    if(currentGame === "game2") game2();
+    requestAnimationFrame(loop);
+}
+loop();
+</script>
+
+</body>
+</html>
